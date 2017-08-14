@@ -7,28 +7,30 @@ task :default => :spec
 
 namespace :db do
   desc 'Init cassandra keyspace and model'
-  task :migrations do
+  task :keyspace do
   	require 'colorize'
     require 'highline'
-    require './lib/running_tracker_database'
+    require './lib/running_tracker_cassandra_database'
 
     begin
       cli = HighLine.new
       convert = -> (str) { str =~ /^y$/i }
-      message = "Are you trying to run migrations for the running tracker database ? (y / n)"
+      message = "Are you trying to create the keyspace for cassandra ? (y / n)"
       agree = cli.ask(message, convert) { |q| q.validate = /^(y|n)$/i }
 
       if agree
-      	endpoint = cli.ask('Endpoint: ') { |q| q.default = "mysql2://root:root@localhost/running_tracker" }
+      	cluster = cli.ask('Cluster: ') { |q| q.default = "localhost" }
+        keyspace = cli.ask('keyspace: ') { |q| q.default = "running_tracker" }
+
+        cluster = { hosts: [cluster] }
 
         puts 'Connecting...'.blue
-        db = RunningTrackerDatabase.connect({ 'endpoint' => endpoint, 'max_connections' => 1 })
+        session = RunningTrackerCassandraDatabase.connect({ 'cluster' => cluster, 'keyspace' => keyspace })
 
-        puts 'Running migrations...'.blue
-        RunningTrackerDatabase.create_models!(db)
+        puts 'Running construction...'.blue
+        RunningTrackerCassandraDatabase.construct_models!(session)
 
         puts 'Done!!'.green
-        puts "Schema version number is: #{db[:schema_info].first[:database_version]}"
       else
         puts 'Bye'.green
       end
