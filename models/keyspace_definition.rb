@@ -20,8 +20,8 @@ module RunningTrackerCassandraDatabase
 			def geopoints_type
 				type_definition = <<-TYPE_CQL
 					CREATE TYPE geopoint (
-			   		latitude double,
-			   		longitude double,
+				   		latitude double,
+				   		longitude double,
 					)
 					TYPE_CQL
 			end
@@ -29,22 +29,24 @@ module RunningTrackerCassandraDatabase
 			def unprocessed_geopoints_table
 				table_definition = <<-TABLE_CQL
 				  CREATE TABLE unprocessed_geopoints (
-				    training_session_id TEXT,
-				    datetime TIMESTAMP,
+				    training_session_id text,
+				    id timeuuid,
+				    datetime timestamp,
 				    location frozen<geopoint>,
-				    PRIMARY KEY (training_session_id)
-				  )
+				    PRIMARY KEY (training_session_id, id)
+				  ) WITH CLUSTERING ORDER BY (id ASC)
 				TABLE_CQL
 			end
 
 			def processed_geopoints_table
 				table_definition = <<-TABLE_CQL
 				  CREATE TABLE processed_geopoints (
-				    training_session_id TEXT,
-				    datetime TIMESTAMP,
+				    training_session_id text,
+				    id timeuuid,
+				    datetime timestamp,
 				    location frozen<geopoint>,
-				    PRIMARY KEY (training_session_id)
-				  )
+				    PRIMARY KEY (training_session_id, id)
+				  ) WITH CLUSTERING ORDER BY (id ASC)
 				TABLE_CQL
 			end
 		end
