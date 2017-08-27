@@ -1,7 +1,7 @@
 require "running_tracker_cassandra_database/version"
 
 require 'cassandra'
-require './models/constructor'
+require_relative '../models/constructor'
 require_relative 'data_accessor'
 
   
